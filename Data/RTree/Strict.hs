@@ -5,7 +5,7 @@
 
 {- |
     Module     : Data.RTree.Strict
-    Copyright  : Copyright (c) 2015, Birte Wagner, Sebastian Philipp
+    Copyright  : Copyright (c) 2014, Birte Wagner, Sebastian Philipp
     License    : MIT
 
     Maintainer : Birte Wagner, Sebastian Philipp (sebastian@spawnhost.de)
@@ -46,8 +46,6 @@ module Data.RTree.Strict
     , lookup
     , lookupRange
     , lookupRangeWithKey
-    , lookupContainsRange
-    , lookupContainsRangeWithKey
     , length
     , null
     , keys
@@ -78,7 +76,7 @@ import qualified Data.RTree.MBB as MBB
 newtype RTree a = RTree {toLazy' :: Lazy.RTree a}
     deriving (Show, Eq, Typeable, Generic, NFData, Binary, Monoid)
 
--- | converts a lazy RTree into a strict RTree
+-- | converts a lazy RTree into a strict RTree 
 -- /O(n)/
 toStrict :: Lazy.RTree a -> RTree a
 toStrict t = map id (RTree t)
@@ -219,14 +217,6 @@ lookupRangeWithKey mbb = Lazy.lookupRangeWithKey mbb . toLazy
 -- | returns all values, which are located in the given bounding box.
 lookupRange :: MBB -> RTree a -> [a]
 lookupRange mbb = Lazy.lookupRange mbb . toLazy
-
--- | returns all keys and values containing the given bounding box
-lookupContainsRangeWithKey :: MBB -> RTree a -> [(MBB, a)]
-lookupContainsRangeWithKey mbb = Lazy.lookupContainsRangeWithKey mbb . toLazy
-
--- | returns all values containing the given bounding box
-lookupContainsRange :: MBB -> RTree a -> [a]
-lookupContainsRange mbb = Lazy.lookupContainsRange mbb .toLazy
 
 -- -----------
 -- delete

@@ -1,6 +1,6 @@
 {- |
     Module     : Data.RTree
-    Copyright  : Copyright (c) 2015, Birte Wagner, Sebastian Philipp
+    Copyright  : Copyright (c) 2014, Birte Wagner, Sebastian Philipp
     License    : MIT
 
     Maintainer : Birte Wagner, Sebastian Philipp (sebastian@spawnhost.de)
@@ -45,8 +45,8 @@ module Data.RTree
     , lookup
     , lookupRange
     , lookupRangeWithKey
-    , lookupContainsRange
-    , lookupContainsRangeWithKey
+    , lookupIntersect
+    , lookupIntersectWithKey
     , length
     , null
     , keys

@@ -3,7 +3,7 @@
 
 {- |
   Module     : Data.RTree.MBB
-  Copyright  : Copyright (c) 2015, Birte Wagner, Sebastian Philipp
+  Copyright  : Copyright (c) 2014, Birte Wagner, Sebastian Philipp
   License    : MIT
 
   Maintainer : Birte Wagner, Sebastian Philipp (sebastian@spawnhost.de)
@@ -23,9 +23,7 @@ module Data.RTree.MBB
     containsMBB,
     unionMBB,
     unionsMBB,
-    intersectMBB,
-    isValidMBB,
-    isPointMBB
+    intersectMBB
 )
 where
 
@@ -47,13 +45,6 @@ mbb :: Double -- ^ x - coordinate of first point
     -> Double   -- ^ x - coordinate of second point
     -> MBB
 mbb = MBB
-
--- | the property, that a 'MBB' must hold
-isValidMBB :: MBB -> Bool
-isValidMBB (MBB ulx uly brx bry) = (ulx <= brx) && (uly <= bry)
-
-isPointMBB :: MBB -> Bool
-isPointMBB (MBB ulx uly brx bry) = (ulx == brx) && (uly == bry)
 
 -- | internal only.
 unionsMBB :: [MBB] -> MBB

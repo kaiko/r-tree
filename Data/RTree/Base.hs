@@ -1,9 +1,9 @@
-{-# LANGUAGE NoMonomorphismRestriction, DeriveFunctor, OverlappingInstances, DeriveDataTypeable, BangPatterns #-}
+{-# LANGUAGE NoMonomorphismRestriction, DeriveFunctor, DeriveDataTypeable, BangPatterns #-}
 {-# LANGUAGE DeriveGeneric #-}
 
 {- |
     Module     : Data.RTree.Base
-    Copyright  : Copyright (c) 2015, Birte Wagner, Sebastian Philipp
+    Copyright  : Copyright (c) 2014, Birte Wagner, Sebastian Philipp
     License    : MIT
 
     Maintainer : Birte Wagner, Sebastian Philipp (sebastian@spawnhost.de)
@@ -33,8 +33,9 @@ module Data.RTree.Base
     , lookup
     , lookupRange
     , lookupRangeWithKey
-    , lookupContainsRangeWithKey
-    , lookupContainsRange
+    , lookupIntersect
+    , lookupIntersectWithKey
+
     , length
     , null
     , keys
@@ -42,6 +43,7 @@ module Data.RTree.Base
     -- * Lists
     , fromList
     , toList
+
     -- * Internal and Testing
     , foldWithMBB
     , pp
@@ -70,10 +72,10 @@ import           Data.List (maximumBy, minimumBy, partition)
 import qualified Data.List as L (length,map)
 import           Data.Maybe (catMaybes, isJust)
 import qualified Data.Maybe as Maybe (mapMaybe)
-import           Data.Monoid (Monoid, mempty, mappend)
+-- import           Data.Monoid (Monoid, mempty, mappend)
 import           Data.Typeable (Typeable)
 
-import           Control.Applicative ((<$>))
+-- import           Control.Applicative ((<$>))
 import           Control.DeepSeq (NFData, rnf)
 
 import           GHC.Generics (Generic)
@@ -328,21 +330,31 @@ lookupRangeWithKey mbb t = founds
 lookupRange :: MBB -> RTree a -> [a]
 lookupRange mbb t = snd <$> (lookupRangeWithKey mbb t)
 
--- | returns all keys and values containing the given bounding box
-lookupContainsRangeWithKey :: MBB -> RTree a -> [(MBB, a)]
-lookupContainsRangeWithKey _ Empty = []
-lookupContainsRangeWithKey mbb t@Leaf{}
-    | (getMBB t) `containsMBB` mbb = [(getMBB t, getElem t)]
-    | otherwise = []
-lookupContainsRangeWithKey mbb t = founds
-    where
-    matches = filter intersectRTree $ getChildren t
-    founds = concatMap (lookupContainsRangeWithKey mbb) matches
-    intersectRTree x = (getMBB x) `containsMBB` mbb
+lookupIntersect :: MBB -> RTree a -> [a]
+lookupIntersect mbb Empty = []
+lookupIntersect mbb t@Leaf{}
+  | isJust (mbb `intersectMBB` (getMBB t)) = [getElem t]
+  | otherwise = []
+lookupIntersect mbb t = l t [] -- foldr l [] $ getChildren t
+  where
+    l x@Leaf{} xs
+      | isJust (mbb `intersectMBB` getMBB x) = getElem x : xs
+      | otherwise = xs
+    l Empty xs = xs
+    l x xs = foldr l xs $ getChildren x
 
--- | returns all values containing the given bounding box
-lookupContainsRange :: MBB -> RTree a -> [a]
-lookupContainsRange mbb t = snd <$> (lookupContainsRangeWithKey mbb t)
+lookupIntersectWithKey :: MBB -> RTree a -> [(MBB, a)]
+lookupIntersectWithKey mbb Empty = []
+lookupIntersectWithKey mbb t@Leaf{}
+  | isJust (mbb `intersectMBB` (getMBB t)) = [(getMBB t, getElem t)]
+  | otherwise = []
+lookupIntersectWithKey mbb t = l t [] -- foldr l [] $ getChildren t
+  where
+    l x@Leaf{} xs
+      | isJust (mbb `intersectMBB` getMBB x) = (getMBB x, getElem x) : xs
+      | otherwise = xs
+    l Empty xs = xs
+    l x xs = foldr l xs $ getChildren x
 
 -- -----------
 -- delete
@@ -493,3 +505,4 @@ instance  (Binary a) => Binary (RTree a) where
 instance (Monoid a) => Monoid (RTree a) where
     mempty = empty
     mappend = unionWith mappend
+
